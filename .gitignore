@@ -1,6 +1,9 @@
+*.zip
 *.exe
 *.dll
 *.o
 *.obj
 *.class
+*.exp
+*.lib
 build/
