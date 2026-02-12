@@ -8,3 +8,5 @@
 *.lib
 html/
 build/
+build_dynamic/
+build_static/
