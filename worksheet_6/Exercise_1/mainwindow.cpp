@@ -66,3 +66,9 @@ void MainWindow::handleTreeClicked(const QModelIndex &index)
 
     emit statusUpdateMessage("Selected item: " + name, 0);
 }
+
+void MainWindow::on_actionOpen_File_triggered()
+{
+    emit statusUpdateMessage("Open File action triggered", 3000);
+}
+
