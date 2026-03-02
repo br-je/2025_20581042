@@ -22,6 +22,9 @@ set(PROJECT_SOURCES
 	ModelPartList.cpp
 	ModelPartList.h
 	icons.qrc
+	PartPropertiesDialog.cpp
+	PartPropertiesDialog.h
+	PartPropertiesDialog.ui
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -29,6 +32,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         icons.qrc
+        partpropertiesdialog.h partpropertiesdialog.cpp partpropertiesdialog.ui
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Exercise_1 APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFileInfo>
+#include "PartPropertiesDialog.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -36,6 +37,11 @@ MainWindow::MainWindow(QWidget *parent)
             childItem->appendChild(subItem);
         }
     }
+
+    ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    connect(ui->treeView, &QTreeView::customContextMenuRequested,
+            this, &MainWindow::openContextMenu);
 
     connect(this, &MainWindow::statusUpdateMessage,
             ui->statusbar, &QStatusBar::showMessage);
@@ -71,7 +77,13 @@ void MainWindow::handleTreeClicked(const QModelIndex &index)
 
 void MainWindow::on_actionOpen_File_triggered()
 {
-    emit statusUpdateMessage("Open File action triggered", 3000);
+    QModelIndex index = ui->treeView->currentIndex();
+
+    if (!index.isValid())
+    {
+        emit statusUpdateMessage("No item selected", 3000);
+        return;
+    }
 
     QString fileName = QFileDialog::getOpenFileName(
         this,
@@ -84,7 +96,50 @@ void MainWindow::on_actionOpen_File_triggered()
         return;
 
     QFileInfo info(fileName);
-    emit statusUpdateMessage("Selected file: " + info.fileName(), 3000);
 
+    ModelPart* part =
+        static_cast<ModelPart*>(index.internalPointer());
+
+    if (!part)
+        return;
+
+    //Update column 0 (Name)
+    part->set(0, info.fileName());
+
+    //Refresh tree view
+    ui->treeView->viewport()->update();
+
+    emit statusUpdateMessage(
+        "Item renamed to: " + info.fileName(),
+        3000
+        );
 }
 
+void MainWindow::openContextMenu(const QPoint &pos)
+{
+    QModelIndex index = ui->treeView->indexAt(pos);
+    if (!index.isValid()) return;
+
+    ModelPart *part =
+        static_cast<ModelPart*>(index.internalPointer());
+
+    if (!part) return;
+
+    QMenu menu(this);
+    QAction *editAction = menu.addAction("Edit Properties");
+
+    QAction *selected =
+        menu.exec(ui->treeView->viewport()->mapToGlobal(pos));
+
+    if (selected == editAction)
+    {
+        PartPropertiesDialog dialog(this);
+        dialog.setModelPart(part);
+
+        if (dialog.exec() == QDialog::Accepted)
+        {
+            ui->treeView->viewport()->update();
+            emit statusUpdateMessage("Item properties updated", 3000);
+        }
+    }
+}

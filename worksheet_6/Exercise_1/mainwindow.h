@@ -31,6 +31,9 @@ public slots:
 private slots:
     void on_actionOpen_File_triggered();
 
+private slots:
+    void openContextMenu(const QPoint &pos);
+
 private:
     Ui::MainWindow *ui;
     ModelPartList* partList;
