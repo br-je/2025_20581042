@@ -1,5 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#include "ModelPart.h"
+#include "ModelPartList.h"
 
 #include <QMainWindow>
 
@@ -25,5 +27,6 @@ public slots:
 
 private:
     Ui::MainWindow *ui;
+    ModelPartList* partList;
 };
 #endif // MAINWINDOW_H
