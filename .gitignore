@@ -10,3 +10,21 @@ html/
 build/
 build_dynamic/
 build_static/
+
+# Visual Studio
+.vs/
+*.sln
+*.vcxproj*
+*.VC.db
+
+# Qt Creator
+.qtcreator/
+
+# CMake build directories
+build/
+cmake-build-*/
+
+# Database/cache files
+*.sqlite
+*.opendb
+*.vsidx
