@@ -13,6 +13,8 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+signals:
+    void statusUpdateMessage(const QString &message, int timeout);
 
 public:
     MainWindow(QWidget *parent = nullptr);
