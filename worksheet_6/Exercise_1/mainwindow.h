@@ -25,6 +25,9 @@ public:
 public slots:
     void handleButton1();
 
+public slots:
+    void handleTreeClicked(const QModelIndex &index);
+
 private:
     Ui::MainWindow *ui;
     ModelPartList* partList;

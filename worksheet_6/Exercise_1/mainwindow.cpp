@@ -8,6 +8,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    connect(ui->treeView, &QTreeView::clicked,
+            this, &MainWindow::handleTreeClicked);
+
     // Create the model
     this->partList = new ModelPartList("Parts List");
 
@@ -47,4 +50,19 @@ MainWindow::~MainWindow()
 void MainWindow::handleButton1()
 {
     emit statusUpdateMessage("Button 1 clicked", 3000);
+}
+
+void MainWindow::handleTreeClicked(const QModelIndex &index)
+{
+    // Get pointer to the underlying ModelPart
+    ModelPart* selectedPart =
+        static_cast<ModelPart*>(index.internalPointer());
+
+    if (!selectedPart)
+        return;
+
+    // Column 0 = name
+    QString name = selectedPart->data(0).toString();
+
+    emit statusUpdateMessage("Selected item: " + name, 0);
 }
