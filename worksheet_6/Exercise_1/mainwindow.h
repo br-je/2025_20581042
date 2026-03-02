@@ -13,9 +13,13 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+public slots:
+    void handleButton1();
 
 private:
     Ui::MainWindow *ui;
