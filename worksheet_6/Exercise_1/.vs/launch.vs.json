@@ -1,0 +1,12 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "default",
+      "project": "CMakeLists.txt",
+      "projectTarget": "Exercise_1.exe",
+      "name": "Exercise_1.exe"
+    }
+  ]
+}
