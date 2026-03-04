@@ -58,6 +58,16 @@ MainWindow::MainWindow(QWidget *parent)
     // Attach model to tree view
     ui->treeView->setModel(this->partList);
 
+    //Create top-level folder node
+    QModelIndex rootIndex;
+    partsRootIndex = partList->appendChild(
+        rootIndex,
+        { QString("Parts"), QString("true") }
+        );
+
+    ui->treeView->expand(partsRootIndex);
+    ui->treeView->setCurrentIndex(partsRootIndex);
+
     // Get root item
     //ModelPart* rootItem = this->partList->getRootItem();
 
@@ -86,6 +96,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->pushButton, &QPushButton::released,
             this, &MainWindow::handleButton1);
+
+    connect(ui->ClearSelectionButton, &QPushButton::released,
+            this, &MainWindow::handleClearSelection);
 }
 
 MainWindow::~MainWindow()
@@ -101,14 +114,14 @@ void MainWindow::handleButton1()
 
 void MainWindow::handleTreeClicked(const QModelIndex &index)
 {
-    // Get pointer to the underlying ModelPart
+    //Get pointer to the underlying ModelPart
     ModelPart* selectedPart =
         static_cast<ModelPart*>(index.internalPointer());
 
     if (!selectedPart)
         return;
 
-    // Column 0 = name
+    //Column 0 = name
     QString name = selectedPart->data(0).toString();
 
     emit statusUpdateMessage("Selected item: " + name, 0);
@@ -128,26 +141,40 @@ void MainWindow::on_actionOpen_File_triggered()
 
     QFileInfo info(fileName);
 
-    // Selected parent (may be invalid -> root)
-    QModelIndex parentIndex = ui->treeView->currentIndex();
+    QModelIndex index = ui->treeView->currentIndex();
 
-    // Append a NEW item to the tree (top-level if parentIndex invalid)
-    QModelIndex childIndex = partList->appendChild(
-        parentIndex,
-        { info.fileName(), QString("true") }
-        );
+    //Overwrite if a part is selected (and it's not the Parts folder)
+    if (index.isValid() && index != partsRootIndex)
+    {
+        ModelPart* part = static_cast<ModelPart*>(index.internalPointer());
+        if (!part)
+            return;
 
-    ModelPart* part = static_cast<ModelPart*>(childIndex.internalPointer());
-    if (!part)
-        return;
+        part->set(0, info.fileName());
+        part->loadSTL(fileName);
 
-    // Load STL into this new part
-    part->loadSTL(fileName);
+        ui->treeView->viewport()->update();
+    }
+    else
+    {
+        //Add new STL under Parts folder
+        QModelIndex parentIndex = partsRootIndex;
 
-    // Update UI + render
-    ui->treeView->expand(parentIndex);
-    ui->treeView->setCurrentIndex(childIndex);
-    ui->treeView->viewport()->update();
+        QModelIndex childIndex = partList->appendChild(
+            parentIndex,
+            { info.fileName(), QString("true") }
+            );
+
+        ModelPart* part = static_cast<ModelPart*>(childIndex.internalPointer());
+        if (!part)
+            return;
+
+        part->loadSTL(fileName);
+
+        ui->treeView->expand(parentIndex);
+        ui->treeView->setCurrentIndex(childIndex);
+        ui->treeView->viewport()->update();
+    }
 
     updateRender();
 
@@ -213,4 +240,11 @@ void MainWindow::updateRenderFromTree(const QModelIndex& index)
         QModelIndex childIndex = partList->index(i, 0, index);
         updateRenderFromTree(childIndex);
     }
+}
+
+void MainWindow::handleClearSelection()
+{
+    ui->treeView->clearSelection();
+    ui->treeView->setCurrentIndex(QModelIndex()); // clears current item
+    emit statusUpdateMessage("Selection cleared", 2000);
 }

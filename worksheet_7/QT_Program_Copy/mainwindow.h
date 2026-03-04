@@ -37,6 +37,9 @@ private slots:
 private slots:
     void openContextMenu(const QPoint &pos);
 
+public slots:
+    void handleClearSelection();
+
 private:
     Ui::MainWindow *ui;
     ModelPartList* partList;
@@ -44,5 +47,6 @@ private:
     vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWindow;
     void updateRender();
     void updateRenderFromTree(const QModelIndex& index);
+    QModelIndex partsRootIndex;
 };
 #endif // MAINWINDOW_H
