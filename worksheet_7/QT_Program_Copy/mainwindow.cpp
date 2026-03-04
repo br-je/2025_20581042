@@ -59,22 +59,22 @@ MainWindow::MainWindow(QWidget *parent)
     ui->treeView->setModel(this->partList);
 
     // Get root item
-    ModelPart* rootItem = this->partList->getRootItem();
+    //ModelPart* rootItem = this->partList->getRootItem();
 
     // Add demo data
-    for (int i = 0; i < 3; i++) {
-        QString name = QString("TopLevel %1").arg(i);
-        QString visible("true");
+    //for (int i = 0; i < 3; i++) {
+        //QString name = QString("TopLevel %1").arg(i);
+        //QString visible("true");
 
-        ModelPart* childItem = new ModelPart({name, visible});
-        rootItem->appendChild(childItem);
+        //ModelPart* childItem = new ModelPart({name, visible});
+        //rootItem->appendChild(childItem);
 
-        for (int j = 0; j < 5; j++) {
-            QString subName = QString("Item %1,%2").arg(i).arg(j);
-            ModelPart* subItem = new ModelPart({subName, visible});
-            childItem->appendChild(subItem);
-        }
-    }
+        //for (int j = 0; j < 5; j++) {
+            //QString subName = QString("Item %1,%2").arg(i).arg(j);
+            //ModelPart* subItem = new ModelPart({subName, visible});
+            //childItem->appendChild(subItem);
+        //}
+    //}
 
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -95,6 +95,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::handleButton1()
 {
+    updateRender();
     emit statusUpdateMessage("Button 1 clicked", 3000);
 }
 
@@ -115,19 +116,11 @@ void MainWindow::handleTreeClicked(const QModelIndex &index)
 
 void MainWindow::on_actionOpen_File_triggered()
 {
-    QModelIndex index = ui->treeView->currentIndex();
-
-    if (!index.isValid())
-    {
-        emit statusUpdateMessage("No item selected", 3000);
-        return;
-    }
-
     QString fileName = QFileDialog::getOpenFileName(
         this,
-        tr("Open File"),
+        tr("Open STL"),
         "C:\\",
-        tr("STL Files (*.stl);;Text Files (*.txt)")
+        tr("STL Files (*.stl)")
         );
 
     if (fileName.isEmpty())
@@ -135,22 +128,30 @@ void MainWindow::on_actionOpen_File_triggered()
 
     QFileInfo info(fileName);
 
-    ModelPart* part =
-        static_cast<ModelPart*>(index.internalPointer());
+    // Selected parent (may be invalid -> root)
+    QModelIndex parentIndex = ui->treeView->currentIndex();
 
+    // Append a NEW item to the tree (top-level if parentIndex invalid)
+    QModelIndex childIndex = partList->appendChild(
+        parentIndex,
+        { info.fileName(), QString("true") }
+        );
+
+    ModelPart* part = static_cast<ModelPart*>(childIndex.internalPointer());
     if (!part)
         return;
 
-    //Update column 0 (Name)
-    part->set(0, info.fileName());
+    // Load STL into this new part
+    part->loadSTL(fileName);
 
-    //Refresh tree view
+    // Update UI + render
+    ui->treeView->expand(parentIndex);
+    ui->treeView->setCurrentIndex(childIndex);
     ui->treeView->viewport()->update();
 
-    emit statusUpdateMessage(
-        "Item renamed to: " + info.fileName(),
-        3000
-        );
+    updateRender();
+
+    emit statusUpdateMessage("Loaded: " + info.fileName(), 3000);
 }
 
 void MainWindow::openContextMenu(const QPoint &pos)
@@ -177,6 +178,8 @@ void MainWindow::openContextMenu(const QPoint &pos)
         if (dialog.exec() == QDialog::Accepted)
         {
             ui->treeView->viewport()->update();
+            //Render updates on each change to dialog box
+            updateRender();
             emit statusUpdateMessage("Item properties updated", 3000);
         }
     }

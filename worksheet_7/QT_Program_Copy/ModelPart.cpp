@@ -153,6 +153,7 @@ void ModelPart::loadSTL( QString fileName ) {
 
         actor = vtkSmartPointer<vtkActor>::New();
         actor->SetMapper(mapper);
+
 }
 
 vtkSmartPointer<vtkActor> ModelPart::getActor() {
