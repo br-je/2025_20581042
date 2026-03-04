@@ -181,3 +181,33 @@ void MainWindow::openContextMenu(const QPoint &pos)
         }
     }
 }
+
+void MainWindow::updateRender()
+{
+    renderer->RemoveAllViewProps();
+
+    // Start recursion from root
+    updateRenderFromTree(QModelIndex());
+
+    renderer->ResetCamera();
+    renderWindow->Render();
+}
+
+void MainWindow::updateRenderFromTree(const QModelIndex& index)
+{
+    if (index.isValid())
+    {
+        ModelPart* part = static_cast<ModelPart*>(index.internalPointer());
+        if (part && part->getActor() && part->visible())
+        {
+            renderer->AddActor(part->getActor());
+        }
+    }
+
+    int rows = partList->rowCount(index);
+    for (int i = 0; i < rows; i++)
+    {
+        QModelIndex childIndex = partList->index(i, 0, index);
+        updateRenderFromTree(childIndex);
+    }
+}

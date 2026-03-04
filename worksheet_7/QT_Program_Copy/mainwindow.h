@@ -42,5 +42,7 @@ private:
     ModelPartList* partList;
     vtkSmartPointer<vtkRenderer> renderer;
     vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWindow;
+    void updateRender();
+    void updateRenderFromTree(const QModelIndex& index);
 };
 #endif // MAINWINDOW_H
